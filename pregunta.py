@@ -44,6 +44,4 @@ def clean_data():
 
     # Luego de depurar, se pueden haber generado duplicados, por lo que se eliminan de nuevo
     df.drop_duplicates(inplace = True)
-
-
     return df
