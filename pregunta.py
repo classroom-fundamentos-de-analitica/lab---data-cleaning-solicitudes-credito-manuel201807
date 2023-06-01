@@ -2,8 +2,10 @@
 Limpieza de datos usando Pandas
 -----------------------------------------------------------------------------------------
 
-Realice la limpieza del dataframe. Los tests evaluan si la limpieza fue realizada 
+
+Realice la limpieza del dataframe. Los tests evaluan si la limpieza fue realizada
 correctamente. Tenga en cuenta datos faltantes y duplicados.
+
 
 """
 import re
@@ -42,4 +44,6 @@ def clean_data():
 
     # Luego de depurar, se pueden haber generado duplicados, por lo que se eliminan de nuevo
     df.drop_duplicates(inplace = True)
+
+
     return df
