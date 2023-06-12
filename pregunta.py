@@ -6,36 +6,39 @@ Realice la limpieza del dataframe. Los tests evaluan si la limpieza fue realizad
 correctamente. Tenga en cuenta datos faltantes y duplicados.
 
 """
-import re
-import pandas as pd
 from datetime import datetime
+import pandas as pd
+import re
+
 
 def clean_data():
-    df = pd.read_csv("solicitudes_credito.csv", sep=";", index_col = 0)
+    df = pd.read_csv("solicitudes_credito.csv", sep=";", index_col=0)
     
-    # Eliminación de datos faltantes y duplicados
-    df.dropna(axis = 0, inplace = True)
-    df.drop_duplicates(inplace = True)
+    #Eliminar datos duplicados y faltantes
+    df.dropna(inplace=True)
 
-    # Poner en minúscula las columnas de tipo texto y eliminar carácteres especiales de idea_negocio y barrio
-    for columna in ['sexo', 'tipo_de_emprendimiento', 'idea_negocio', 'línea_credito', 'barrio']:
-        df[columna] = df[columna].str.lower()
-        df[columna] = df[columna].apply(lambda x: x.replace('_', ' '))
-        df[columna] = df[columna].apply(lambda x: x.replace('-', ' '))
+    df.sexo = df.sexo.str.lower()
 
-    # Depurar la columna monto_del_credito quitando los carácteres extraños (No numéricos)
-    df['monto_del_credito'] = df['monto_del_credito'].str.replace("\$[\s*]", "")
-    df['monto_del_credito'] = df['monto_del_credito'].str.replace(",", "")
-    df['monto_del_credito'] = df['monto_del_credito'].str.replace("\.00", "")
-    df['monto_del_credito'] = df['monto_del_credito'].astype(int)
-    
-    # Corregir tipo de dato de la columna comuna_ciudadano
-    df['comuna_ciudadano'] = df['comuna_ciudadano'].astype(float)
+    df.tipo_de_emprendimiento = df.tipo_de_emprendimiento.str.lower()
 
-    # Corregir tipo de dato de la columna comuna_ciudadano -> Pasar a formato de fecha
-    df['fecha_de_beneficio'] = df['fecha_de_beneficio'].apply(lambda x: datetime.strptime(x, "%Y/%m/%d") if (len(re.findall("^\d+/", x)[0]) - 1) == 4 else datetime.strptime(x, "%d/%m/%Y"))
+    df.idea_negocio = [str.lower(idea.replace("_", " ").replace("-", " ")) for idea in df.idea_negocio]
 
-    # Luego de depurar, se pueden haber generado duplicados, por lo que se eliminan de nuevo
-    df.drop_duplicates(inplace = True)
+    df.barrio = [str.lower(barrio).replace("_", " ").replace("-", " ") for barrio in df.barrio]
+
+    df.comuna_ciudadano = df.comuna_ciudadano.astype(int)
+
+    df.estrato = df.estrato.astype(int)
+
+    df["línea_credito"] = [str.lower(linea.strip().replace("-", " ").replace("_", " ").replace(". ", ".")) for linea in
+                           df["línea_credito"]]
+
+    df.fecha_de_beneficio = [datetime.strptime(date, "%d/%m/%Y") if bool(re.search(r"\d{1,2}/\d{2}/\d{4}", date))
+                             else datetime.strptime(date, "%Y/%m/%d")
+                             for date in df.fecha_de_beneficio]
+
+    df.monto_del_credito = [int(monto.replace("$ ", "").replace(".00", "").replace(",", "")) for monto in
+                            df.monto_del_credito]
+
+    df.drop_duplicates(inplace=True)
 
     return df
